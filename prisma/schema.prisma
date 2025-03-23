@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id       Int    @id @default(autoincrement())
+  name     String
+  username String
+  password String
+}
+
+model Products {
+  id        Int         @id @default(autoincrement())
+  product   String
+  amount    Int
+  tax       Int
+  price     Int
+  total     Int
+  Inventory Inventory[]
+  History   History[]
+}
+
+model Inventory {
+  id        Int         @id @default(autoincrement())
+  productId Int
+  product   Products    @relation(fields: [productId], references: [id])
+  amount    Int
+  DetCredit DetCredit[]
+  Carrito   Carrito[]
+  DetSales  DetSales[]
+}
+
+model History {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Products @relation(fields: [productId], references: [id])
+  amount    Int
+  date      DateTime
+}
+
+model Carrito {
+  id        Int       @id @default(autoincrement())
+  productId Int
+  product   Inventory @relation(fields: [productId], references: [id])
+  amount    Int
+  total     Int
+}
+
+model Sales {
+  id        Int        @id @default(autoincrement())
+  methodPay MethodPay
+  date      DateTime
+  total     Int
+  DetSales  DetSales[]
+}
+
+enum MethodPay {
+  Efectivo
+  Divisa
+  Punto
+  Transferencia
+}
+
+model DetSales {
+  id        Int       @id @default(autoincrement())
+  salesId   Int
+  sales     Sales     @relation(fields: [salesId], references: [id])
+  productId Int
+  product   Inventory @relation(fields: [productId], references: [id])
+  amount    Int
+  total     Int
+}
+
+model Students {
+  id       Int      @id @default(autoincrement())
+  name     String
+  grade    String
+  parentId Int
+  parent   Parents  @relation(fields: [parentId], references: [id])
+  Credit   Credit[]
+}
+
+model Parents {
+  id       Int        @id @default(autoincrement())
+  name     String
+  phone    String
+  Students Students[]
+}
+
+model DetCredit {
+  id        Int       @id @default(autoincrement())
+  creditId  Int
+  credit    Credit    @relation(fields: [creditId], references: [id])
+  productId Int
+  product   Inventory @relation(fields: [productId], references: [id])
+  amount    Int
+  total     Int
+}
+
+model Credit {
+  id        Int         @id @default(autoincrement())
+  studentId Int
+  student   Students    @relation(fields: [studentId], references: [id])
+  total     Int
+  pending   Boolean
+  date      DateTime
+  datePay   DateTime
+  DetCredit DetCredit[]
+}
